@@ -237,6 +237,7 @@ function checkSummaryStatus(jsonOBJ, checkForDataURL) {
 					$(".savedone").removeAttr('disabled');
 	            	applyBeautyTips();
 	            	unresolvedGrpsHandler();
+			updateSummarySelect();
 	            	$(".instance_browser_ui").removeAttr('disabled');
 				},
 				error: function() {
@@ -251,6 +252,35 @@ function checkSummaryStatus(jsonOBJ, checkForDataURL) {
 		$('.errmsg').html(errStyle + 'Error on checking for ligand summary data.<br />\n' + ChemCompLiteMod.adminContact).show().delay(5000).slideUp(800);
 	}
 }
+
+function updateSummarySelect(){
+    // Update the display of the selection boxes
+    // Returns true if at least one LOI has been selected
+    // backgroundColor needs to be ued due to jquery 1.4 in DepUI
+    if ($('.selectinstnc_td :checked').length > 0) {
+	// Set to transparent maybe?
+	$(".selectinstnc_td").css("backgroundColor", "");
+	if ($('.c_NONE_special .selectinstnc_td :checked').length > 0) {
+	    // NONE is selected
+	    $('#ligand_inventory_tbl .selectinstnc_td .selectinst_stdgrp').attr('disabled', 'disabled');
+	    $('#ligand_inventory_tbl .selectinstnc_td .selectinst_none').removeAttr('disabled');
+	} else {
+	    // NONE is not selected
+	    $('#ligand_inventory_tbl .selectinstnc_td .selectinst_stdgrp').removeAttr('disabled');
+	    protectRsrchDataHandler()
+	    $('#ligand_inventory_tbl .selectinstnc_td .selectinst_none').attr('disabled', 'disabled')
+	}
+
+    } else {
+	// Nothing selected - all get enabled - unless restricted
+	$(".selectinstnc_td").css("backgroundColor", "#FFE6E6");
+	$('#ligand_inventory_tbl .selectinstnc_td .selectinst_stdgrp').removeAttr('disabled');
+	protectRsrchDataHandler()
+	$('#ligand_inventory_tbl .selectinstnc_td .selectinst_none').removeAttr('disabled');
+    }
+
+}
+
 
 function checkForRsltsData(jsonOBJ,checkForDataURL,delaySecsServer){
 	//if( ChemCompLiteMod.currBrowser == "msie" ){
@@ -501,8 +531,13 @@ $(document).on('click','input.savedone', function() {
 		$('#hlprfrm').ajaxSubmit({url: ChemCompLiteMod.URL.EXIT_FINISHED, clearForm: false,
             beforeSubmit: function (formData, jqForm, options) {
             	numToResolve = unresolvedGrpsHandler();
+		var loidone = $('.selectinstnc_td :checked').length > 0;
         	    if( numToResolve > 0 ){
         	    	alert("Ligand processing cannot be completed because one or more ligands require attention. Please address any outstanding mismatches.");
+        	    	return false;
+        	    }
+        	    if( !loidone ){
+        	    	alert("Ligand processing cannot be completed as 'Focus of Research' has not been specified from summary page.");
         	    	return false;
         	    }
         	    formData.push({"name": "sessionid", "value": CC_LITE_SESSION_DATA.sessionID});
@@ -632,6 +667,9 @@ $(document).on("click","#selectall_rsrch",function() {
 		
 		updateResearchList(ligIdLst,"remove");
 	}
+
+        // Update background of selection boxess
+        updateSummarySelect();
 });
 
 function updateResearchList(ligIds,mode){
@@ -657,6 +695,9 @@ $(document).on("click",".selectinstnc_rsrch",function() {
 		//$('input.selectinstnc[name="'+thisLigID+'"]').prop('checked', this.checked);
 		updateResearchList(thisLigID,"add");
 	}
+
+        // Update background of selection boxess
+        updateSummarySelect();
 });
 
 /*$(document).on("click", 'input.selectinstnc_rsrch[name="HOH"]', function(){
