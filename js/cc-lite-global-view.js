@@ -537,7 +537,11 @@ $(document).on('click','input.savedone', function() {
         	    	return false;
         	    }
         	    if( !loidone ){
-        	    	alert("Ligand processing cannot be completed as 'Focus of Research' has not been specified from summary page.");
+			if ($(".instance_browser_ui").is(":visible")) {
+        	    	    alert("Ligand processing cannot be completed as 'Focus of Research' has not been specified from this page.");
+			} else {
+        	    	    alert("Ligand processing cannot be completed as 'Focus of Research' has not been specified from summary page. Please press the 'Back to Summary View' button to return to summary page to correct this.");
+			    }
         	    	return false;
         	    }
         	    formData.push({"name": "sessionid", "value": CC_LITE_SESSION_DATA.sessionID});
