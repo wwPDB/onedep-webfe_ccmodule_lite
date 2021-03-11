@@ -237,7 +237,7 @@ function checkSummaryStatus(jsonOBJ, checkForDataURL) {
 					$(".savedone").removeAttr('disabled');
 	            	applyBeautyTips();
 	            	unresolvedGrpsHandler();
-			updateSummarySelect();
+								updateSummarySelect();
 	            	$(".instance_browser_ui").removeAttr('disabled');
 				},
 				error: function() {
@@ -251,6 +251,22 @@ function checkSummaryStatus(jsonOBJ, checkForDataURL) {
 		//$('.errmsg').html(errStyle + 'Error: ' + JSON.stringify(jsonOBJ) + '<br />\n' + ChemCompLiteMod.adminContact).show().delay(5000).slideUp(800);
 		$('.errmsg').html(errStyle + 'Error on checking for ligand summary data.<br />\n' + ChemCompLiteMod.adminContact).show().delay(5000).slideUp(800);
 	}
+}
+
+function loadSummaryData() {
+	$(ChemCompLiteMod.loadSmmryFrmLctr).ajaxSubmit({url: ChemCompLiteMod.URL.LOAD_LIG_SMMRY_DATA, async: true, clearForm: false,
+		target: '#rslts',
+				success: function() {
+			$(".savedone").removeAttr('disabled');
+						applyBeautyTips();
+						unresolvedGrpsHandler();
+						updateSummarySelect();
+						$(".instance_browser_ui").removeAttr('disabled');
+		},
+		error: function() {
+			$('.errmsg').html(errStyle + 'Failed to load ligand summary data.' + '<br />\n' + ChemCompLiteMod.adminContact).show();
+		}
+	});
 }
 
 function updateSummarySelect(){
@@ -518,8 +534,9 @@ function highlightColorRsrchDataSaveBtn(authAssgnGrp){
 ///////////////////// END OF FUNCTION DEFINITIONS - Global Ligand Summary View /////////////////////////////////////////
 
 //////////////////// FUNCTION CALLS - Global Ligand Summary View //////////////////////////////////////////////////////
-//getBrowserType();
-getLigSummaryRslts();
+// getBrowserType();
+// getLigSummaryRslts();
+loadSummaryData();
 
 //////////////////// END OF FUNCTION CALLS - Global Ligand Summary View ///////////////////////////////////////////////
 

@@ -798,7 +798,7 @@ $(document).on("click",".single_instance .threeD_chck_bx", function(){
 		//invoke jsmol for experimental data
 		if( !( $('#e'+uniqeId+'_appletinfotablediv').length ) ){
 			authAssgndGrp = $('#'+expThreeDdivId).attr('name');
-			loadFilePath = CC_LITE_SESSION_DATA.sessPathPrefix+'/'+instid+'/report/'+authAssgndGrp+'_model.cif';
+			loadFilePath = '/service/cc_lite/report/get_file?identifier=' + CC_LITE_SESSION_DATA.depId + '&source=author&ligid=' + instid + '&file=' + authAssgndGrp + '_model.cif';
 			loadFileJsmol("e"+uniqeId,expThreeDdivId,loadFilePath,"default");
 			$('#e'+uniqeId+"_appletinfotablediv").css({'padding-left':'0px', 'border-style':'none'});
 			$('#e'+uniqeId+"_appletdiv").css({'padding-left':'0px', 'border-style':'none'});
@@ -807,7 +807,7 @@ $(document).on("click",".single_instance .threeD_chck_bx", function(){
 		if( !($('#r'+uniqeId+'_appletinfotablediv').length ) ) {
 			if( $('#'+refThreeDdivId).length ){
 				refCcId = $('#'+refThreeDdivId).attr('name');
-				loadFilePath = CC_LITE_SESSION_DATA.sessPathPrefix+'/rfrnc_reports/'+refCcId+'/'+refCcId+'_ideal.cif';
+				loadFilePath = '/service/cc_lite/report/get_file?identifier=' + CC_LITE_SESSION_DATA.depId + '&source=ccd&ligid=' + refCcId + '&file=' + refCcId + '_ideal.cif';
 				loadFileJsmol('r'+uniqeId,refThreeDdivId,loadFilePath,"default");
 				$('#r'+uniqeId+'_appletinfotablediv').css({'padding-left':'0px', 'border-style':'none'});
 				$('#r'+uniqeId+'_appletdiv').css({'padding-left':'0px', 'border-style':'none'});
