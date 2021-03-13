@@ -359,40 +359,48 @@ function loadInstanceBrowserView() {
 		$('#ligids_rsrch_inst_vw').val(listOfLigIdsRsrchFocus);
 		//ChemCompLiteMod.ligIdsCrrntlyInInstcVw = ChemCompLiteMod.ligIdsSlctdForInstcVw.concat(); //RPS, 20121130: planning to use this for smarter re-rendering of instance browser
 		
-		$('#inst_brwsr_frm').ajaxSubmit({url: ChemCompLiteMod.URL.LOAD_INSTNC_BRWSR, async: true, clearForm: false,
-    		beforeSubmit: function (formData, jqForm, options) {
-    			formData.push({"name": "browser", "value": ChemCompLiteMod.currBrowser });
-    		},
+		// $('#inst_brwsr_frm').ajaxSubmit({url: ChemCompLiteMod.URL.LOAD_INSTNC_BRWSR, async: true, clearForm: false,
+		$('#inst_brwsr_frm').ajaxSubmit({url: CC_LITE_SESSION_DATA.servicePathPrefix+'/service/cc_lite/report/instancelist', async: true, clearForm: false,
+    		beforeSubmit: function (formData, jqForm, options) { formData.push({"name": "browser", "value": ChemCompLiteMod.currBrowser }); },
             target: '#instnc_browser_container',
             success: function() {
-    			$('#pagi').paginate({count: $('.tabscount').size(), start:ChemCompLiteMod.activeCCid, display:6, border:true, border_color:'#BEF8B8',
-    				text_color:'#68BA64', background_color:'#E3F2E1', border_hover_color:'#68BA64', text_hover_color:'black',
-    				background_hover_color:'#CAE6C6', images:false, mouse:'press', onChange:function(page){
-    					$('._current').removeClass('_current').slideUp('slow');
-    					$('#p'+page).addClass('_current').slideDown('slow');
-    					$('#p_'+page).addClass('_current').slideDown('slow');
-    					$('#p__'+page).addClass('_current').slideDown('slow');
-    					ChemCompLiteMod.activeCCid = page;
-    				}
-    			});
+							$('#pagi').paginate({count: $('.tabscount').size(), start:ChemCompLiteMod.activeCCid, display:6, border:true, border_color:'#BEF8B8',
+							text_color:'#68BA64', background_color:'#E3F2E1', border_hover_color:'#68BA64', text_hover_color:'black',
+							background_hover_color:'#CAE6C6', images:false, mouse:'press', onChange:function(page){
+								$('._current').removeClass('_current').slideUp('slow');
+								$('#p'+page).addClass('_current').slideDown('slow');
+								$('#p_'+page).addClass('_current').slideDown('slow');
+								$('#p__'+page).addClass('_current').slideDown('slow');
+								ChemCompLiteMod.activeCCid = page;
+							}
+						});
     			$('.single_instance').hide();
-    			//$('div.all_instances').hide(); //May have to reactivate this	until annotators decide for sure to have all instances expanded by default as per below
-    			//$( '#help' ).button();
+
     			//have to do below because content is usually loaded on click of component navigation browser
     			//but on first load of page, the content below should be shown by default (i.e. without requiring user clicks)
     			var firstGrp = $('.cmpnt_grp:first').html();
-    			// for DEBUG $('.cmpnt_grp:first').show().css({ 'border-color':'#F00', 'border-style': 'solid', 'border-width': '2px' });
-    			//alert("got to point before auto load.");
-    			$('.inneraccordion .head.'+firstGrp+'_hdr:not([class*=all_instances]):not([class*=rsrch_data])').each( function(index) {
-    				var instnc_profile_html = $(this).next().attr('id');
-					var instnc_id = $(this).next().attr('name');
-					//alert("instnc_id is: "+instnc_id);
-					if(instnc_profile_html.length){
-						if( $('#'+instnc_id).html().length < 100 ){
-							//alert("About to load instnc profile.");
-							$('#'+instnc_id).load(instnc_profile_html);
+
+					// loading image and data for first instance
+					var firstItem = $('.inneraccordion .head.'+firstGrp+'_hdr:not([class*=all_instances]):not([class*=rsrch_data])').first();
+					var firstInstanceProfileHtml = firstItem.next().attr('id');
+					var firstInstanceId = firstItem.next().attr('name');
+
+					if (firstInstanceProfileHtml.length){
+						if( $('#'+firstInstanceId).html().length < 100 ){
+							$('#'+firstInstanceId).load(firstInstanceProfileHtml);
 						}
 					}
+
+    			$('.inneraccordion .head.'+firstGrp+'_hdr:not([class*=all_instances]):not([class*=rsrch_data])').on('click', function(index) {
+    				var instnc_profile_html = $(this).next().attr('id');
+						var instnc_id = $(this).next().attr('name');
+						//alert("instnc_id is: "+instnc_id);
+						if (instnc_profile_html.length){
+							if( $('#'+instnc_id).html().length < 100 ){
+								//alert("About to load instnc profile.");
+								$('#'+instnc_id).load(instnc_profile_html);
+							}
+						}
     			});
     			//First accordion level now expanded by default with below
     			$('.inneraccordion').each( function(index) {
