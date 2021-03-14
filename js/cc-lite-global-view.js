@@ -69,8 +69,17 @@ $(document).on('lazybeforeunveil', function (e) {
 		return;
 	}
 
+	if (target.attr('id') === 'mismatch_section') {
+		var ajax = target.data('ajax');
+
+		if (ajax) {
+			target.load(ajax);
+		}
+
+		return;
+	}
+
 	if (!target.hasClass('single_instance')) {
-		console.log(target, e.target);
 		// then it's the header, we must expand it
 		target.next().show('slow');
 		target.find('span.ui-icon').toggleClass('ui-icon-circle-arrow-s ui-icon-circle-arrow-e');
@@ -128,7 +137,13 @@ function renderHtmlTemplate(response, targetElement) {
 		// classes
 		ligandEntry.data.bGrpRequiresAttention = ligandEntry.data.bGrpRequiresAttention ? 'attn_reqd' : '';
 		ligandEntry.data.bGrpRequiresAttentionDisplay = ligandEntry.data.bGrpRequiresAttention ? '' : 'displaynone';
-		ligandEntry.data.bGrpMismatchAddressed = ligandEntry.data.bGrpMismatchAddressed ? 'is_rslvd' : 'not_rslvd';
+		ligandEntry.data.isResolvedClass = ligandEntry.data.isResolved ? 'is_rslvd' : 'not_rslvd';
+
+		if (!ligandEntry.data.isResolved) {
+			ligandEntry.mismatchUrl = '/service/cc_lite/report/get_file?identifier=' + CC_LITE_SESSION_DATA.depId + '&source=report&ligid=' + ligandEntry.ligGroup + '&file=' + ligandEntry.ligGroup + '_mismatch.html';
+		} else {
+			ligandEntry.mismatchUrl = null;
+		}
 
 		templateData.ligands.push(ligandEntry);
 	}
