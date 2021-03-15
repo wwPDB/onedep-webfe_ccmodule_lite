@@ -98,6 +98,7 @@ function renderHtmlTemplate(response, targetElement) {
 
 	templateData = {
 		depId: CC_LITE_SESSION_DATA.depId,
+		getReportFileServiceUrl: CC_LITE_SESSION_DATA.servicePathPrefix + ChemCompLiteMod.URL.GET_REPORT_FILE,
 		ligands: [],
 	};
 
@@ -134,13 +135,13 @@ function renderHtmlTemplate(response, targetElement) {
 		ligandEntry.dynamicText.copy = ligGroupData['totlInstncsInGrp'] > 1 ? 'copies' : 'copy';
 		ligandEntry.dynamicText.totalText = ligGroupData['totlInstncsInGrp'] > 21 ? ligGroupData['totlInstncsInGrp'] : numberText[ligGroupData['totlInstncsInGrp']];
 		
-		// classes
+		// css classes
 		ligandEntry.data.bGrpRequiresAttention = ligandEntry.data.bGrpRequiresAttention ? 'attn_reqd' : '';
 		ligandEntry.data.bGrpRequiresAttentionDisplay = ligandEntry.data.bGrpRequiresAttention ? '' : 'displaynone';
 		ligandEntry.data.isResolvedClass = ligandEntry.data.isResolved ? 'is_rslvd' : 'not_rslvd';
 
 		if (!ligandEntry.data.isResolved) {
-			ligandEntry.mismatchUrl = '/service/cc_lite/report/get_file?identifier=' + CC_LITE_SESSION_DATA.depId + '&source=report&ligid=' + ligandEntry.ligGroup + '&file=' + ligandEntry.ligGroup + '_mismatch.html';
+			ligandEntry.mismatchUrl = CC_LITE_SESSION_DATA.servicePathPrefix + ChemCompLiteMod.URL.GET_REPORT_FILE + '?identifier=' + CC_LITE_SESSION_DATA.depId + '&source=report&ligid=' + ligandEntry.ligGroup + '&file=' + ligandEntry.ligGroup + '_mismatch.html';
 		} else {
 			ligandEntry.mismatchUrl = null;
 		}
@@ -447,13 +448,12 @@ function loadInstanceBrowserView() {
 	var listOfLigIdsRsrchFocus = $('#ligids_rsrch').val(); // i.e. currently selected in global view
 	var listOfLigIdsRsrchForInstVw = $('#ligids_rsrch_inst_vw').val(); // i.e. last known list of those IDs which were inpsected in Instance Browser view
 	if( $('#instnc_browser_container').html().length <= 150 || ( listOfLigIdsForInstVw != listOfLigIds ) || ( listOfLigIdsRsrchForInstVw != listOfLigIdsRsrchFocus ) ){
-		$('#instnc_browser_container').html('<div class="loading_msg">&nbsp;&nbsp;<img src="'+CC_LITE_SESSION_DATA.servicePathPrefix+'"/images/loading.gif" alt="loading..." />&nbsp;&nbsp;Data being processed.</div>');
+		$('#instnc_browser_container').html('<div class="loading_msg">&nbsp;&nbsp;<img src="/images/loading.gif" alt="loading..." />&nbsp;&nbsp;Data being processed.</div>');
 		$('#instnc_brwser_vw').show();
 		$('#ligids_inst_vw').val(listOfLigIds);
 		$('#ligids_rsrch_inst_vw').val(listOfLigIdsRsrchFocus);
-		//ChemCompLiteMod.ligIdsCrrntlyInInstcVw = ChemCompLiteMod.ligIdsSlctdForInstcVw.concat(); //RPS, 20121130: planning to use this for smarter re-rendering of instance browser
 		
-		$('#inst_brwsr_frm').ajaxSubmit({url: CC_LITE_SESSION_DATA.servicePathPrefix+'/service/cc_lite/report/instancelist', async: true, clearForm: false,
+		$('#inst_brwsr_frm').ajaxSubmit({url: CC_LITE_SESSION_DATA.servicePathPrefix + ChemCompLiteMod.URL.GET_LIGAND_SUMMARY, async: true, clearForm: false,
     		beforeSubmit: function (formData, jqForm, options) { formData.push({"name": "browser", "value": ChemCompLiteMod.currBrowser }); },
 					target: '#instnc_browser_container',
 					success: function(response) {

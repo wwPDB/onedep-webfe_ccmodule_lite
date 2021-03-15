@@ -21,7 +21,7 @@
                     <a id="{{.}}_hdr" class="lazyload head ui-corner-all {{ligGroup}}_hdr {{data.isResolvedClass}} {{data.bGrpRequiresAttention}}" href="#">
                         <span class="ui-icon fltlft ui-icon-circle-arrow-e"></span> Instance: {{.}} <span class="attn_reqd {{ligGroup}} {{data.bGrpRequiresAttentionDisplay}}">requires attention </span>
                     </a>
-                    <div class="single_instance lazyload" data-ajax="/service/cc_lite/report/get_file?identifier={{depId}}&source=report&ligid={{.}}&file={{.}}instnc_profile.html" name="{{.}}" style="display: block;">
+                    <div class="single_instance lazyload" data-ajax="{{getReportFileServiceUrl}}?identifier={{depId}}&source=report&ligid={{.}}&file={{.}}instnc_profile.html" name="{{.}}" style="display: block;">
                     </div>
                     <br class="clearfloat" />
                 </div>

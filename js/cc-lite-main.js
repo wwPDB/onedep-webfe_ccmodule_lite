@@ -48,6 +48,9 @@ var ChemCompLiteMod = {
 	dataAvail: "no",
 	URL: {
 		GEN_LIG_SMMRY_RSLTS: CC_LITE_SESSION_DATA.servicePathPrefix+'/service/cc_lite/view/ligandsummary',
+		GET_LIGAND_SUMMARY: CC_LITE_SESSION_DATA.servicePathPrefix+'/service/cc_lite/report/summary',
+		GET_REPORT_FILE: CC_LITE_SESSION_DATA.servicePathPrefix+'/service/cc_lite/report/file',
+		GET_REPORT_STATUS: CC_LITE_SESSION_DATA.servicePathPrefix+'/service/cc_lite/report/status',
 		CHECK_FOR_SMMRY_DATA: CC_LITE_SESSION_DATA.servicePathPrefix+'/service/cc_lite/view/ligandsummary/data_check',
 		LOAD_LIG_SMMRY_DATA: CC_LITE_SESSION_DATA.servicePathPrefix+'/service/cc_lite/view/ligandsummary/data_load',
 		LOAD_INSTNC_BRWSR: CC_LITE_SESSION_DATA.servicePathPrefix+'/service/cc_lite/view/instancebrowser',
