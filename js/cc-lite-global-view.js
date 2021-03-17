@@ -140,7 +140,7 @@ function renderHtmlTemplate(response, targetElement) {
 		ligandEntry.data.bGrpRequiresAttentionDisplay = ligandEntry.data.bGrpRequiresAttention ? '' : 'displaynone';
 		ligandEntry.data.isResolvedClass = ligandEntry.data.isResolved ? 'is_rslvd' : 'not_rslvd';
 
-		if (!ligandEntry.data.isResolved) {
+		if (ligandEntry.data.bGrpRequiresAttention === 'attn_reqd') {
 			ligandEntry.mismatchUrl = CC_LITE_SESSION_DATA.servicePathPrefix + ChemCompLiteMod.URL.GET_REPORT_FILE + '?identifier=' + CC_LITE_SESSION_DATA.depId + '&source=report&ligid=' + ligandEntry.ligGroup + '&file=' + ligandEntry.ligGroup + '_mismatch.html';
 		} else {
 			ligandEntry.mismatchUrl = null;
@@ -625,7 +625,34 @@ function highlightColorRsrchDataSaveBtn(authAssgnGrp){
 //////////////////// FUNCTION CALLS - Global Ligand Summary View //////////////////////////////////////////////////////
 // getBrowserType();
 // getLigSummaryRslts();
-loadSummaryData();
+
+function getAnalysisState() {
+	return fetch(ChemCompLiteMod.URL.GET_REPORT_STATUS + '?sessionid=' + CC_LITE_SESSION_DATA.sessionID + '&identifier=' + CC_LITE_SESSION_DATA.depId + '&instance=&filesource=deposit')
+		.then(function (r) { return r.json() })
+		.then(function (r) {
+			switch (r.state) {
+				case 'running':
+					$('.loading_msg').get(0).innerText = 'Analysis still in progress... ' + Number.parseFloat(r.progress*100).toFixed(2) + '% complete.';
+					break;
+				case 'finished':
+					loadSummaryData();
+				case 'stopped':
+				case 'unknown':
+					clearInterval(CC_LITE_SESSION_DATA.intervalHandle);
+					break;
+				default:
+					break;
+			}
+
+			return r;
+		});
+}
+
+getAnalysisState().then(function (r) {
+	if (r.state == 'running') {
+		CC_LITE_SESSION_DATA.intervalHandle = setInterval(getAnalysisState, 2000);
+	}
+});
 
 //////////////////// END OF FUNCTION CALLS - Global Ligand Summary View ///////////////////////////////////////////////
 
