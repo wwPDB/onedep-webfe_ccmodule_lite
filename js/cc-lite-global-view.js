@@ -635,10 +635,16 @@ function getAnalysisState() {
 					$('.loading_msg').get(0).innerText = 'Analysis still in progress... ' + Number.parseFloat(r.progress*100).toFixed(2) + '% complete.';
 					break;
 				case 'finished':
+					clearInterval(window.stateHandle);
 					loadSummaryData();
+					break;
+				case 'missing_file':
+					$('.loading_msg').get(0).innerText = 'Running pre-analysis operations. This may take a while.';
+					break;
 				case 'stopped':
 				case 'unknown':
-					clearInterval(CC_LITE_SESSION_DATA.intervalHandle);
+					clearInterval(window.stateHandle);
+					$('.loading_msg').get(0).innerHtml = 'Something went wrong. Please, run the analysis again.';
 					break;
 				default:
 					break;
@@ -648,11 +654,12 @@ function getAnalysisState() {
 		});
 }
 
-getAnalysisState().then(function (r) {
-	if (r.state == 'running') {
-		CC_LITE_SESSION_DATA.intervalHandle = setInterval(getAnalysisState, 2000);
-	}
-});
+getAnalysisState()
+	.then(function (r) {
+		if (r.state == 'running') {
+			window.stateHandle = setInterval(getAnalysisState, 3000);
+		}
+	});
 
 //////////////////// END OF FUNCTION CALLS - Global Ligand Summary View ///////////////////////////////////////////////
 
