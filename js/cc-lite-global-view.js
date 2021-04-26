@@ -62,6 +62,101 @@ if(!String.prototype.replaceAll){
 }
 
 ///////////////////// FUNCTION DEFINITIONS - Global Ligand Summary View ///////////////////////////////////////////
+$(document).on('lazybeforeunveil', function (e) {
+	var target = $(e.target);
+
+	if (!target) {
+		return;
+	}
+
+	if (target.attr('id') === 'mismatch_section') {
+		var ajax = target.data('ajax');
+
+		if (ajax) {
+			target.load(ajax);
+		}
+
+		return;
+	}
+
+	if (!target.hasClass('single_instance')) {
+		// then it's the header, we must expand it
+		target.next().show('slow');
+		target.find('span.ui-icon').toggleClass('ui-icon-circle-arrow-s ui-icon-circle-arrow-e');
+	} else {
+		var ajax = target.data('ajax');
+
+		if (ajax) {
+			target.load(ajax);
+		}
+	}
+});
+
+function renderHtmlTemplate(response, targetElement) {
+	var numberText = ["Zero","One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight","Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
+		"Sixteen", "Seventeen", "Eighteen", "Nineteen","Twenty"];
+
+	templateData = {
+		depId: CC_LITE_SESSION_DATA.depId,
+		getReportFileServiceUrl: CC_LITE_SESSION_DATA.servicePathPrefix + ChemCompLiteMod.URL.GET_REPORT_FILE,
+		ligands: [],
+	};
+
+	rKeys = Object.keys(response);
+	tabStyle = '_current';
+
+	for (var i = 0; i < rKeys.length; i++) {
+		if (i + 1 > 1) {
+			tabStyle = 'displaynone';
+		}
+
+		ligGroupData = response[rKeys[i]];
+
+		ligandEntry = {
+			index: i + 1,
+			tabStyle: tabStyle,
+			ligGroup: rKeys[i],
+			dynamicText: {},
+			data: ligGroupData,
+		};
+		
+		// mismatch text
+		if (ligGroupData['bGrpRequiresAttention']) {
+			var text1 = ligGroupData['totlInstncsInGrp'] > 1 ? 'there is at least one instance for which ' : '';
+			var text2 = ligGroupData['totlInstncsInGrp'] > 1 ? 'sections below for those instances that require ' : 'section below for the instance that requires ';
+
+			ligandEntry.dynamicText.mismatchMessage = '<br /><br />However, ' + text1 + 'there is a discrepancy between the coordinates for ' + rKeys[i] + ' and the possible match in the CCD. Please see ' + text2 + 'attention. Clicking on section headers labelled "instance" will expand/collapse content. Both 2D and 3D comparison views are provided.<br /><br />The section "address mismatched instances of: ' + rKeys[i] + '" allows you to provide more information about this ligand. Please provide at least one of the following: an alternative ligand ID, a chemical diagram by file upload of image file or a descriptor string in SMILES/InChI format. When you have finished with this ligand, press the "Save" button at the bottom of the page.';
+		} else {
+			ligandEntry.dynamicText.mismatchMessage = '';
+		}
+
+		// singular/plurar variants
+		ligandEntry.dynamicText.have = ligGroupData['totlInstncsInGrp'] > 1 ? 'have' : 'has';
+		ligandEntry.dynamicText.copy = ligGroupData['totlInstncsInGrp'] > 1 ? 'copies' : 'copy';
+		ligandEntry.dynamicText.totalText = ligGroupData['totlInstncsInGrp'] > 21 ? ligGroupData['totlInstncsInGrp'] : numberText[ligGroupData['totlInstncsInGrp']];
+		
+		// css classes
+		ligandEntry.data.bGrpRequiresAttention = ligandEntry.data.bGrpRequiresAttention ? 'attn_reqd' : '';
+		ligandEntry.data.bGrpRequiresAttentionDisplay = ligandEntry.data.bGrpRequiresAttention ? '' : 'displaynone';
+		ligandEntry.data.isResolvedClass = ligandEntry.data.isResolved ? 'is_rslvd' : 'not_rslvd';
+
+		if (ligandEntry.data.bGrpRequiresAttention === 'attn_reqd') {
+			ligandEntry.mismatchUrl = CC_LITE_SESSION_DATA.servicePathPrefix + ChemCompLiteMod.URL.GET_REPORT_FILE + '?identifier=' + CC_LITE_SESSION_DATA.depId + '&source=report&ligid=' + ligandEntry.ligGroup + '&file=' + ligandEntry.ligGroup + '_mismatch.html';
+		} else {
+			ligandEntry.mismatchUrl = null;
+		}
+
+		templateData.ligands.push(ligandEntry);
+	}
+
+	return fetch('/ccmodule_lite/templates/workflow_ui/instances_view/cc_instance_browser_template.html')
+    .then(function (response) { return response.text() })
+    .then(function (template) {
+      var rendered = Mustache.render(template, templateData);
+			document.getElementById(targetElement).innerHTML = rendered;
+    });
+}
+
 function applyBeautyTips() {
 	/***$('#help_instnc_brwser_vw').bt({positions: ['left', 'bottom'],ajaxPath: CC_LITE_SESSION_DATA.servicePathPrefix+'/ccmodule/cc_help.html div#instance',ajaxOpts:{dataType:'html'},trigger: 'click',
 	width: 600,centerPointX: 0.9,spikeLength: 20,spikeGirth: 10,padding: 15,cornerRadius: 25,fill: '#FFF',
@@ -237,7 +332,7 @@ function checkSummaryStatus(jsonOBJ, checkForDataURL) {
 					$(".savedone").removeAttr('disabled');
 	            	applyBeautyTips();
 	            	unresolvedGrpsHandler();
-			updateSummarySelect();
+								updateSummarySelect();
 	            	$(".instance_browser_ui").removeAttr('disabled');
 				},
 				error: function() {
@@ -251,6 +346,22 @@ function checkSummaryStatus(jsonOBJ, checkForDataURL) {
 		//$('.errmsg').html(errStyle + 'Error: ' + JSON.stringify(jsonOBJ) + '<br />\n' + ChemCompLiteMod.adminContact).show().delay(5000).slideUp(800);
 		$('.errmsg').html(errStyle + 'Error on checking for ligand summary data.<br />\n' + ChemCompLiteMod.adminContact).show().delay(5000).slideUp(800);
 	}
+}
+
+function loadSummaryData() {
+	$(ChemCompLiteMod.loadSmmryFrmLctr).ajaxSubmit({url: ChemCompLiteMod.URL.LOAD_LIG_SMMRY_DATA, async: true, clearForm: false,
+		target: '#rslts',
+				success: function() {
+			$(".savedone").removeAttr('disabled');
+						applyBeautyTips();
+						unresolvedGrpsHandler();
+						updateSummarySelect();
+						$(".instance_browser_ui").removeAttr('disabled');
+		},
+		error: function() {
+			$('.errmsg').html(errStyle + 'Failed to load ligand summary data.' + '<br />\n' + ChemCompLiteMod.adminContact).show();
+		}
+	});
 }
 
 function updateSummarySelect(){
@@ -337,105 +448,99 @@ function loadInstanceBrowserView() {
 	var listOfLigIdsRsrchFocus = $('#ligids_rsrch').val(); // i.e. currently selected in global view
 	var listOfLigIdsRsrchForInstVw = $('#ligids_rsrch_inst_vw').val(); // i.e. last known list of those IDs which were inpsected in Instance Browser view
 	if( $('#instnc_browser_container').html().length <= 150 || ( listOfLigIdsForInstVw != listOfLigIds ) || ( listOfLigIdsRsrchForInstVw != listOfLigIdsRsrchFocus ) ){
-		$('#instnc_browser_container').html('<div class="loading_msg">&nbsp;&nbsp;<img src="'+CC_LITE_SESSION_DATA.servicePathPrefix+'"/images/loading.gif" alt="loading..." />&nbsp;&nbsp;Data being processed.</div>');
+		$('#instnc_browser_container').html('<div class="loading_msg">&nbsp;&nbsp;<img src="/images/loading.gif" alt="loading..." />&nbsp;&nbsp;Data being processed.</div>');
 		$('#instnc_brwser_vw').show();
 		$('#ligids_inst_vw').val(listOfLigIds);
 		$('#ligids_rsrch_inst_vw').val(listOfLigIdsRsrchFocus);
-		//ChemCompLiteMod.ligIdsCrrntlyInInstcVw = ChemCompLiteMod.ligIdsSlctdForInstcVw.concat(); //RPS, 20121130: planning to use this for smarter re-rendering of instance browser
 		
-		$('#inst_brwsr_frm').ajaxSubmit({url: ChemCompLiteMod.URL.LOAD_INSTNC_BRWSR, async: true, clearForm: false,
-    		beforeSubmit: function (formData, jqForm, options) {
-    			formData.push({"name": "browser", "value": ChemCompLiteMod.currBrowser });
-    		},
-            target: '#instnc_browser_container',
-            success: function() {
-    			$('#pagi').paginate({count: $('.tabscount').size(), start:ChemCompLiteMod.activeCCid, display:6, border:true, border_color:'#BEF8B8',
-    				text_color:'#68BA64', background_color:'#E3F2E1', border_hover_color:'#68BA64', text_hover_color:'black',
-    				background_hover_color:'#CAE6C6', images:false, mouse:'press', onChange:function(page){
-    					$('._current').removeClass('_current').slideUp('slow');
-    					$('#p'+page).addClass('_current').slideDown('slow');
-    					$('#p_'+page).addClass('_current').slideDown('slow');
-    					$('#p__'+page).addClass('_current').slideDown('slow');
-    					ChemCompLiteMod.activeCCid = page;
-    				}
-    			});
-    			$('.single_instance').hide();
-    			//$('div.all_instances').hide(); //May have to reactivate this	until annotators decide for sure to have all instances expanded by default as per below
-    			//$( '#help' ).button();
-    			//have to do below because content is usually loaded on click of component navigation browser
-    			//but on first load of page, the content below should be shown by default (i.e. without requiring user clicks)
-    			var firstGrp = $('.cmpnt_grp:first').html();
-    			// for DEBUG $('.cmpnt_grp:first').show().css({ 'border-color':'#F00', 'border-style': 'solid', 'border-width': '2px' });
-    			//alert("got to point before auto load.");
-    			$('.inneraccordion .head.'+firstGrp+'_hdr:not([class*=all_instances]):not([class*=rsrch_data])').each( function(index) {
-    				var instnc_profile_html = $(this).next().attr('id');
-					var instnc_id = $(this).next().attr('name');
-					//alert("instnc_id is: "+instnc_id);
-					if(instnc_profile_html.length){
-						if( $('#'+instnc_id).html().length < 100 ){
-							//alert("About to load instnc profile.");
-							$('#'+instnc_id).load(instnc_profile_html);
-						}
-					}
-    			});
-    			//First accordion level now expanded by default with below
-    			$('.inneraccordion').each( function(index) {
-    				$(this).find('.single_instance:first').show();
-    				$(this).find('span.ui-icon:first').toggleClass('ui-icon-circle-arrow-s ui-icon-circle-arrow-e');
-    			});
-    			//Address mismatches level now expanded by default with below
-    			$('.inneraccordion div.all_instances').each( function(index) {
-    				$(this).show();
-    				$(this).parent().find('a.all_instances span.ui-icon').toggleClass('ui-icon-circle-arrow-s ui-icon-circle-arrow-e');
-    				var ligId = $(this).attr('name');
-    				checkMissingLigandTypeField(ligId);
-    				checkForUploadedImageFiles(ligId, "requirementscheck");
-    				//checkMissingAssrtdReqdFields(ligId);
-    				checkCompDefFileUploads(ligId,"refresh");
-    				
-    				
-    			});
-    		    $('#restart').click(function() {
-    		    	alert("[PLACEHOLDER] -- will perform restart action");
-    		    });
-    		    $(".savedone").removeAttr('disabled');
-            	$(".instance_browser_ui").removeAttr('disabled');
-    		    $('.back_to_summary_vw').removeAttr('disabled');
-    		    $('.back_to_summary_vw').show();
-    			$(".instance_browser_ui").hide();
-    			
-    			$(document).on('click','.back_to_summary_vw', function() {
-    				window.parent.$("div.ui-layout-center.ui-layout-pane.ui-layout-pane-center").animate({scrollTop:0}, 'slow');
-        			$('.back_to_summary_vw').hide();
-    		    	$(".instance_browser_ui").show();
-    		    	$("#instnc_brwser_vw").hide();
-    		    	$('#help_instnc_brwser_vw').hide();
-    		    	unresolvedGrpsHandler();
-    		    	$("#ligand_summary_vw").show();
-        			$("#help_batch_smmry_vw").show();
-        			
-        			protectRsrchDataHandler();
-    		    });
-    		    applyBeautyTips();
-    			/*
-    			$('#help').click(function() {
-    		            alert("[PLACEHOLDER]");
-    		    });
-    		    */
-    		    disableCopyRsrchDscrptr();
-            }
-        });
+		$('#inst_brwsr_frm').ajaxSubmit({url: CC_LITE_SESSION_DATA.servicePathPrefix + ChemCompLiteMod.URL.GET_LIGAND_SUMMARY, async: true, clearForm: false,
+    		beforeSubmit: function (formData, jqForm, options) { formData.push({"name": "browser", "value": ChemCompLiteMod.currBrowser }); },
+					target: '#instnc_browser_container',
+					success: function(response) {
+
+					renderHtmlTemplate(response, 'instnc_browser_container').then(function () {
+						$('#pagi').paginate({count: $('.tabscount').size(), start:ChemCompLiteMod.activeCCid, display:6, border:true, border_color:'#BEF8B8',
+						text_color:'#68BA64', background_color:'#E3F2E1', border_hover_color:'#68BA64', text_hover_color:'black',
+						background_hover_color:'#CAE6C6', images:false, mouse:'press', onChange: function(page){
+								$('._current').removeClass('_current').slideUp('slow');
+								$('#p'+page).addClass('_current').slideDown('slow');
+								$('#p_'+page).addClass('_current').slideDown('slow');
+								$('#p__'+page).addClass('_current').slideDown('slow');
+								ChemCompLiteMod.activeCCid = page;
+							}
+						});
+
+						$('.single_instance').hide();
+
+						//have to do below because content is usually loaded on click of component navigation browser
+						//but on first load of page, the content below should be shown by default (i.e. without requiring user clicks)
+						var firstGrp = $('.cmpnt_grp:first').html();
+						//First accordion level now expanded by default with below
+
+						$('.inneraccordion').each( function(index) {
+							$(this).find('.single_instance:first').show();
+							$(this).find('span.ui-icon:first').toggleClass('ui-icon-circle-arrow-s ui-icon-circle-arrow-e');
+						});
+
+						//Address mismatches level now expanded by default with below
+						$('.inneraccordion div.all_instances').each( function(index) {
+							$(this).show();
+							$(this).parent().find('a.all_instances span.ui-icon').toggleClass('ui-icon-circle-arrow-s ui-icon-circle-arrow-e');
+							var ligId = $(this).attr('name');
+							checkMissingLigandTypeField(ligId);
+							checkForUploadedImageFiles(ligId, "requirementscheck");
+							//checkMissingAssrtdReqdFields(ligId);
+							checkCompDefFileUploads(ligId,"refresh");
+						});
+
+						$('#restart').click(function() {
+								alert("[PLACEHOLDER] -- will perform restart action");
+							});
+
+						$(".savedone").removeAttr('disabled');
+						$(".instance_browser_ui").removeAttr('disabled');
+						$('.back_to_summary_vw').removeAttr('disabled');
+						$('.back_to_summary_vw').show();
+						$(".instance_browser_ui").hide();
+						
+						$(document).on('click','.back_to_summary_vw', function() {
+							window.parent.$("div.ui-layout-center.ui-layout-pane.ui-layout-pane-center").animate({scrollTop:0}, 'slow');
+								$('.back_to_summary_vw').hide();
+								$(".instance_browser_ui").show();
+								$("#instnc_brwser_vw").hide();
+								$('#help_instnc_brwser_vw').hide();
+								unresolvedGrpsHandler();
+								$("#ligand_summary_vw").show();
+								$("#help_batch_smmry_vw").show();
+								
+								protectRsrchDataHandler();
+						});
+
+						applyBeautyTips();
+						/*
+						$('#help').click(function() {
+											alert("[PLACEHOLDER]");
+							});
+							*/
+							disableCopyRsrchDscrptr();
+					});
+        }
+      });
+
     	$('ul.jPag-pages li').each( function(index) {
-			var ligId = $(this).text();
-			if( ChemCompLiteMod.ligIdsMismatched.indexOf(ligId) >= 0){
-				$(this).addClass("attn_reqd");
-			}
-			if( ChemCompLiteMod.ligIdsRslvd && ChemCompLiteMod.ligIdsRslvd.indexOf(ligId) >= 0){
-				$(this).addClass("is_rslvd");
-				$(this).removeClass("attn_reqd");
-			}
+				var ligId = $(this).text();
+
+				if( ChemCompLiteMod.ligIdsMismatched.indexOf(ligId) >= 0){
+					$(this).addClass("attn_reqd");
+				}
+
+				if( ChemCompLiteMod.ligIdsRslvd && ChemCompLiteMod.ligIdsRslvd.indexOf(ligId) >= 0){
+					$(this).addClass("is_rslvd");
+					$(this).removeClass("attn_reqd");
+				}
     	});
-        return false;
+      
+			return false;
 	}
 	else{
 		$('#instnc_brwser_vw').show();
@@ -518,8 +623,43 @@ function highlightColorRsrchDataSaveBtn(authAssgnGrp){
 ///////////////////// END OF FUNCTION DEFINITIONS - Global Ligand Summary View /////////////////////////////////////////
 
 //////////////////// FUNCTION CALLS - Global Ligand Summary View //////////////////////////////////////////////////////
-//getBrowserType();
-getLigSummaryRslts();
+// getBrowserType();
+// getLigSummaryRslts();
+
+function getAnalysisState() {
+	return fetch(ChemCompLiteMod.URL.GET_REPORT_STATUS + '?sessionid=' + CC_LITE_SESSION_DATA.sessionID + '&identifier=' + CC_LITE_SESSION_DATA.depId + '&instance=&filesource=deposit')
+		.then(function (r) { return r.json() })
+		.then(function (r) {
+			switch (r.state) {
+				case 'running':
+					$('.loading_msg').get(0).innerText = 'Analysis still in progress... ' + Number.parseFloat(r.progress*100).toFixed(2) + '% complete.';
+					break;
+				case 'finished':
+					clearInterval(window.stateHandle);
+					loadSummaryData();
+					break;
+				case 'missing_file':
+					$('.loading_msg').get(0).innerText = 'Running pre-analysis operations. This may take a while.';
+					break;
+				case 'stopped':
+				case 'unknown':
+					clearInterval(window.stateHandle);
+					$('.loading_msg').get(0).innerHtml = 'Something went wrong. Please, run the analysis again.';
+					break;
+				default:
+					break;
+			}
+
+			return r;
+		});
+}
+
+getAnalysisState()
+	.then(function (r) {
+		if (r.state == 'running') {
+			window.stateHandle = setInterval(getAnalysisState, 3000);
+		}
+	});
 
 //////////////////// END OF FUNCTION CALLS - Global Ligand Summary View ///////////////////////////////////////////////
 
@@ -1173,6 +1313,5 @@ $(document).on("click",".save_rsrch_data", function(){
 	}
 	
 });
-
 
 ////////////////////END OF EVENT HANDLERS - Global Ligand Summary View //////////////////////////////////////////////////////
