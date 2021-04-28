@@ -117,6 +117,8 @@ function loadFileMolstar(containerId, fileUrl) {
 			binary: false,
 		},
 		hideControls: true,
+		bgColor: { r:255, g:255, b:255 },
+		hideCanvasControls: ['expand', 'selection', 'settings', 'controls', 'animation'],
 	};
 
 	var viewerContainer = document.getElementById(containerId);
