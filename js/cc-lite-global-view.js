@@ -626,6 +626,10 @@ function highlightColorRsrchDataSaveBtn(authAssgnGrp){
 // getBrowserType();
 // getLigSummaryRslts();
 
+function runAnalysis() {
+	fetch(ChemCompLiteMod.URL.RUN_LIGAND_ANALYSIS + '?identifier=' + CC_LITE_SESSION_DATA.depId);
+}
+
 function getAnalysisState() {
 	return fetch(ChemCompLiteMod.URL.GET_REPORT_STATUS + '?sessionid=' + CC_LITE_SESSION_DATA.sessionID + '&identifier=' + CC_LITE_SESSION_DATA.depId + '&instance=&filesource=deposit')
 		.then(function (r) { return r.json() })
@@ -638,13 +642,21 @@ function getAnalysisState() {
 					clearInterval(window.stateHandle);
 					loadSummaryData();
 					break;
+				case 'preparing':
+					$('.loading_msg').get(0).innerText = 'Running pre-analysis operations. Please wait.';
+					break;
+				case 'busy':
+					clearInterval(window.stateHandle);
+					$('.loading_msg').get(0).innerText = 'Ligand analysis can\'t be performed at the moment as there is another workflow running. Please come back later.';
+					break;
 				case 'missing_file':
-					$('.loading_msg').get(0).innerText = 'Running pre-analysis operations. This may take a while.';
+					$('.loading_msg').get(0).innerText = 'Now running ligand analysis. Please wait.';
+					runAnalysis();
 					break;
 				case 'stopped':
 				case 'unknown':
 					clearInterval(window.stateHandle);
-					$('.loading_msg').get(0).innerHtml = 'Something went wrong. Please, run the analysis again.';
+					$('.loading_msg').get(0).innerHtml = 'Something went wrong. Please, send a message to an annotator.';
 					break;
 				default:
 					break;
