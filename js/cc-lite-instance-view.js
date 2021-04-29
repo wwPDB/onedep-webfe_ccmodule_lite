@@ -103,26 +103,30 @@ function loadFileJsmol(appName, id, filePath, jmolMode) {
 }
 
 function loadFileMolstar(containerId, fileUrl) {
-	if (!PDBeMolstarPlugin) {
-		console.error('PDBeMolstarPlugin not loaded.');
+	if (!molstar) {
+		console.error('molstar not loaded.');
 		return;
 	}
-	
-	var viewerInstance = new PDBeMolstarPlugin();
 
-	var options = {
-		customData: {
-			url: fileUrl,
-			format: 'cif',
-			binary: false,
-		},
-		hideControls: true,
-		bgColor: { r:255, g:255, b:255 },
-		hideCanvasControls: ['expand', 'selection', 'settings', 'controls', 'animation'],
-	};
+	document.getElementById(containerId).removeAttribute('style');
 
-	var viewerContainer = document.getElementById(containerId);
-	viewerInstance.render(viewerContainer, options);
+	var viewerInstance = new molstar.Viewer(containerId, {
+		extensions: [],
+		layoutIsExpanded: false,
+		layoutShowControls: false,
+		layoutShowRemoteState: false,
+		layoutShowSequence: false,
+		layoutShowLog: false,
+		layoutShowLeftPanel: false,
+
+		viewportShowControls: false,
+		viewportShowSettings: false,
+		viewportShowExpand: false,
+		viewportShowSelectionMode: false,
+		viewportShowAnimation: false
+	});
+
+	viewerInstance.loadStructureFromUrl(fileUrl, 'mmcif', false);
 }
 
 function toggleChemCompDisplay(sInstId,sRefId,sCntxt,bShow){
