@@ -643,20 +643,20 @@ function getAnalysisState() {
 					loadSummaryData();
 					break;
 				case 'preparing':
-					$('.loading_msg').get(0).innerText = 'Running pre-analysis operations. Please wait.';
+					$('.loading_msg').get(0).innerText = 'Running pre-analysis operations. Please revisit this page later.';
 					break;
 				case 'busy':
 					clearInterval(window.stateHandle);
 					$('.loading_msg').get(0).innerText = 'Ligand analysis can\'t be performed at the moment as there is another workflow running. Please come back later.';
 					break;
 				case 'missing_file':
-					$('.loading_msg').get(0).innerText = 'Now running ligand analysis. Please wait.';
+					$('.loading_msg').get(0).innerText = 'Now running ligand analysis. Please revisit this page later.';
 					runAnalysis();
 					break;
 				case 'stopped':
 				case 'unknown':
 					clearInterval(window.stateHandle);
-					$('.loading_msg').get(0).innerHtml = 'Something went wrong. Please, send a message to an annotator.';
+					$('.loading_msg').get(0).innerHtml = 'Something went wrong. Please, send us a message.';
 					break;
 				default:
 					break;
