@@ -586,7 +586,9 @@ $(document).on("click",".lgnd_type", function(){
 function checkMissingAssrtdReqdFields(ccid){
 	//var mrvnSktch = eval('document.MSketch_'+ccid);
 	//var molDataStr;
+	var ligIdRe = RegExp('^[0-9A-Za-z]{1,5}$');
 	var bMissingReqdField = true;
+
 	$('input.reqd.c_'+ccid+':text').each( function() {
 		var value = $(this).val();
 		//alert("current value is:"+value);
@@ -594,6 +596,13 @@ function checkMissingAssrtdReqdFields(ccid){
 			bMissingReqdField = false;
 		}
 	});
+
+	var altrntCcId = $('#alt_ccid_'+ccid).val();
+
+	if (altrntCcId !== '' && !ligIdRe.test(altrntCcId)) {
+		alert('Ligand IDs must contain only letters and numbers.');
+		return bMissingReqdField;
+	}
 	
 	var value = $('#file_img_'+ccid).val();
 	if( value != "undefined" && value.length > 1 ){
@@ -798,7 +807,7 @@ $(document).on("click","input.dscrptr_str", function(){
 
 $(document).on("click","input.alt_ccid.reqd:text", function(){
 	var thisBtnId = $(this).attr('id');
-	limitChars(thisBtnId, 3);
+	limitChars(thisBtnId, 5);
 });
 
 $(document).on("click",".instnc_match_rslts .vizcmp_chck_bx", function(){
