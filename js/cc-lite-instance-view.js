@@ -600,6 +600,7 @@ function checkMissingAssrtdReqdFields(ccid){
 	var altrntCcId = $('#alt_ccid_'+ccid).val();
 
 	if (altrntCcId !== '' && !ligIdRe.test(altrntCcId)) {
+		$('#alt_ccid_'+ccid).val(altrntCcId.replace(/[^0-9A-Za-z]/g, ''));
 		alert('Ligand IDs must contain only letters and numbers.');
 		return bMissingReqdField;
 	}
