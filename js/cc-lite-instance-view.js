@@ -1010,4 +1010,22 @@ function limitChars(textid, limit){
 		return true;
 	}
 }
+
+var nonAsciiRe = RegExp('[^\x20-\x7E]+');
+
+function validateChemicalName(event) {
+	var element = event.target;
+	var ccid = event.target.id.replace('chem_name_', '');
+	var parent = $('#fieldset_opt_' + ccid);
+
+	if (nonAsciiRe.test(element.value)) {
+		parent.css({ 'border-color':'#CD0A0A', 'background-color':'#FEF1EC', 'border-style': 'solid', 'border-width': '1px' });
+		$('.descr_new_lgnd_submit_'+ccid).attr('disabled','disabled');
+		$('#span_spec_chars_error').show();
+	} else {
+		parent.css({ 'border-color':'#f6f6f5', 'background-color': '#FFF', 'border-style': 'groove', 'border-width': '2px' });
+		$('.descr_new_lgnd_submit_'+ccid).removeAttr('disabled');
+		$('#span_spec_chars_error').hide();
+	}
+}
 //////////////////////END: EVENT HANDLERS - Instance Browser View //////////////////////////////////////////////////////
