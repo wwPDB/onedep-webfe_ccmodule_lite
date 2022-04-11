@@ -110,23 +110,25 @@ function loadFileMolstar(containerId, fileUrl) {
 
 	document.getElementById(containerId).removeAttribute('style');
 
-	var viewerInstance = new molstar.Viewer(containerId, {
-		extensions: [],
-		layoutIsExpanded: false,
-		layoutShowControls: false,
-		layoutShowRemoteState: false,
-		layoutShowSequence: false,
-		layoutShowLog: false,
-		layoutShowLeftPanel: false,
+        molstar.Viewer.create(containerId, {
+            extensions: [],
+            layoutIsExpanded: false,
+            layoutShowControls: false,
+            layoutShowRemoteState: false,
+            layoutShowSequence: false,
+            layoutShowLog: false,
+            layoutShowLeftPanel: false,
+	    
+	    viewportShowControls: false,
+	    viewportShowSettings: false,
+            viewportShowExpand: false,
+            viewportShowSelectionMode: false,
+            viewportShowAnimation: false,
+            volumeStreamingDisabled: true
 
-		viewportShowControls: false,
-		viewportShowSettings: false,
-		viewportShowExpand: false,
-		viewportShowSelectionMode: false,
-		viewportShowAnimation: false
+	}).then(function(viewerInstance) {   // This could also be viewerInstance => {
+	    viewerInstance.loadStructureFromUrl(fileUrl, 'mmcif', false);
 	});
-
-	viewerInstance.loadStructureFromUrl(fileUrl, 'mmcif', false);
 }
 
 function toggleChemCompDisplay(sInstId,sRefId,sCntxt,bShow){
