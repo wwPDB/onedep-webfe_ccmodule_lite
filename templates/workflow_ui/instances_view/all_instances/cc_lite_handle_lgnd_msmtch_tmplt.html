@@ -85,9 +85,12 @@
 									<br /><br />
 								</fieldset>
 								<br /><br />
-								<fieldset>
+								<fieldset id="fieldset_opt_%(auth_assgnd_grp)s">
 									<legend><h3>The following items are optional:</h3></legend>
-									<br /><label for="chem_name_%(auth_assgnd_grp)s">1. Enter chemical name:</label><input id="chem_name_%(auth_assgnd_grp)s" class="c_%(auth_assgnd_grp)s descr_nw_lgnd_input " type="text" name="chem_name" value="%(chem_name)s" size="50" %(disabled)s /><br /><br />
+									<div>
+										<span id="span_spec_chars_error" style="color: #f33; display: none;">This field does not allow special characters.</span>
+										<br /><label for="chem_name_%(auth_assgnd_grp)s">1. Enter chemical name:</label><input id="chem_name_%(auth_assgnd_grp)s" class="c_%(auth_assgnd_grp)s descr_nw_lgnd_input " type="text" name="chem_name" value="%(chem_name)s" size="50" %(disabled)s /><br /><br />
+									</div>
 									<label for="chem_frmla_%(auth_assgnd_grp)s">2. Enter chemical formula:</label><input id="chem_frmla_%(auth_assgnd_grp)s" class="c_%(auth_assgnd_grp)s descr_nw_lgnd_input" type="text" name="chem_frmla" value="%(chem_frmla)s" size="50" %(disabled)s /><br /><br />
 									<label for="comments_%(auth_assgnd_grp)s">3. Enter comments:</label><br /><textarea id="comments_%(auth_assgnd_grp)s" class="c_%(auth_assgnd_grp)s descr_nw_lgnd_input" cols="80" rows="5" name="comments" %(disabled)s >%(comments)s</textarea><br /><br />
 								</fieldset>
@@ -117,3 +120,7 @@
 	</div><!--  end of class="all_instances" div-->
 	<br class="clearfloat" />
 	
+	<script>
+		const chemNameInput = document.querySelector('#chem_name_%(auth_assgnd_grp)s');
+		chemNameInput.addEventListener('input', validateChemicalName);
+	</script>
