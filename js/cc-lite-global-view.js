@@ -459,7 +459,7 @@ function loadInstanceBrowserView() {
 					success: function(response) {
 
 					renderHtmlTemplate(response, 'instnc_browser_container').then(function () {
-						$('#pagi').paginate({count: $('.tabscount').size(), start:ChemCompLiteMod.activeCCid, display:6, border:true, border_color:'#BEF8B8',
+						$('#pagi').paginate({count: $('.tabscount').size(), start:ChemCompLiteMod.activeCCid, display:15, border:true, border_color:'#BEF8B8',
 						text_color:'#68BA64', background_color:'#E3F2E1', border_hover_color:'#68BA64', text_hover_color:'black',
 						background_hover_color:'#CAE6C6', images:false, mouse:'press', onChange: function(page){
 								$('._current').removeClass('_current').slideUp('slow');
