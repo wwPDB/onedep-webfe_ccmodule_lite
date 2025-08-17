@@ -679,7 +679,7 @@ getAnalysisState()
 $(document).on('click','input.savedone', function() {
 	var numToResolve = 0;
 	var fsrc = CC_LITE_SESSION_DATA.fileSource.toLowerCase();
-	if( fsrc == "deposit-ui" ){
+	if( (fsrc == "deposit-ui") || (fsrc == "deposit" ) ){
 		$('#hlprfrm').ajaxSubmit({url: ChemCompLiteMod.URL.EXIT_FINISHED, clearForm: false,
             beforeSubmit: function (formData, jqForm, options) {
             	numToResolve = unresolvedGrpsHandler();
