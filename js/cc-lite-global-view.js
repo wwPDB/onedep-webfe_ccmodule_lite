@@ -631,7 +631,7 @@ function runAnalysis() {
 }
 
 function getAnalysisState() {
-	return fetch(ChemCompLiteMod.URL.GET_REPORT_STATUS + '?sessionid=' + CC_LITE_SESSION_DATA.sessionID + '&identifier=' + CC_LITE_SESSION_DATA.depId + '&instance=&filesource=deposit')
+	return fetch(ChemCompLiteMod.URL.GET_REPORT_STATUS + '?sessionid=' + CC_LITE_SESSION_DATA.sessionID + '&identifier=' + CC_LITE_SESSION_DATA.depId + '&instance=&filesource=deposit-ui')
 		.then(function (r) { return r.json() })
 		.then(function (r) {
 			switch (r.state) {
@@ -679,7 +679,7 @@ getAnalysisState()
 $(document).on('click','input.savedone', function() {
 	var numToResolve = 0;
 	var fsrc = CC_LITE_SESSION_DATA.fileSource.toLowerCase();
-	if( fsrc == "deposit" ){
+	if( (fsrc == "deposit-ui") || (fsrc == "deposit" ) ){
 		$('#hlprfrm').ajaxSubmit({url: ChemCompLiteMod.URL.EXIT_FINISHED, clearForm: false,
             beforeSubmit: function (formData, jqForm, options) {
             	numToResolve = unresolvedGrpsHandler();
